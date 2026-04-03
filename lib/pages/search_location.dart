@@ -17,7 +17,7 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  String googlePlacesApi = "AIzaSyDQ2YO5rv0oYKkO9n-Xidu9PZroRB1-tuc";
+  String googlePlacesApi = "// not visible";
   TextEditingController controller = TextEditingController();
   var uuid = const Uuid().v4();
   List data = [];
