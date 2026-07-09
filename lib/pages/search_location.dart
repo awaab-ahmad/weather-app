@@ -2,12 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:weather/services/globals.dart';
 import 'package:http/http.dart' as http;
 import 'package:weather/services/provider.dart';
+import 'package:weather/services/styles.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -70,12 +69,15 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         ),
                         const Expanded(flex: 2, child: SizedBox()),
-                        text('Add Location', 16, FontWeight.w600),
+                        const Text('Add Location', style: Style.simpleWhite),
                         const Expanded(flex: 2, child: SizedBox()),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    text('Search Locations to Add', 14, FontWeight.w500),
+                    const Text(
+                      'Search Locations to Add',
+                      style: Style.standardWhite,
+                    ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: controller,
@@ -87,7 +89,7 @@ class _SearchPageState extends State<SearchPage> {
                         });
                       },
                       cursorColor: const Color(0xFFFFFFFF),
-                      style: style(14, FontWeight.w600),
+                      style: Style.standardWhite,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 08,
@@ -107,7 +109,7 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         ),
                         hintText: 'Search Place',
-                        hintStyle: style(12, FontWeight.w600),
+                        hintStyle: Style.standardWhite,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -118,10 +120,9 @@ class _SearchPageState extends State<SearchPage> {
                         color: const Color(0x33FFFFFF),
                         child: data.isEmpty
                             ? Center(
-                                child: text(
+                                child: const Text(
                                   'Search something ',
-                                  10,
-                                  FontWeight.w500,
+                                  style: Style.smlStandardWhite,
                                 ),
                               )
                             : ListView.builder(
@@ -158,7 +159,7 @@ class _SearchPageState extends State<SearchPage> {
                                     ),
                                     title: Text(
                                       placeName,
-                                      style: style(12, FontWeight.w600),
+                                      style: Style.standardWhite,
                                     ),
                                   );
                                 },
@@ -172,14 +173,6 @@ class _SearchPageState extends State<SearchPage> {
           ],
         ),
       ),
-    );
-  }
-
-  TextStyle style(double s, FontWeight fw) {
-    return GoogleFonts.poppins(
-      fontSize: s,
-      fontWeight: fw,
-      color: const Color(0xFFFFFFFF),
     );
   }
 

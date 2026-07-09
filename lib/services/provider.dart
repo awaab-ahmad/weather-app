@@ -73,7 +73,7 @@ class MainProvider extends ChangeNotifier {
       await mainWeatherIconChanging();
     } else {
       if (kDebugMode) print('The Data List is empty right now');
-    } 
+    }
   }
 
   Future<void> helperFunction(BuildContext context) async {
@@ -155,8 +155,8 @@ class MainProvider extends ChangeNotifier {
     } catch (e) {
       isLoading = false;
       if (kDebugMode) print('Network Error');
-      if(context.mounted) {
-      b.showSnackBar(globalBar('Network Error', context));
+      if (context.mounted) {
+        b.showSnackBar(globalBar('Network Error', context));
       }
     }
     isDoneOnce = true;
@@ -389,15 +389,15 @@ class MainProvider extends ChangeNotifier {
               MaterialPageRoute(
                 builder: (context) => ModelClass(
                   index: indexHelper,
-                  city: cityName,
-                  temperature: temp,
-                  weatherImage: mainWeatherImage,
-                  weatherType: typeOfWeather,
-                  weatherDescription: weatherDescription,
-                  feels: feelsLike,
-                  pressure: pressure,
-                  wind: windSpeed,
-                  humidity: humidity,
+                  // city: cityName,
+                  // temperature: temp,
+                  // weatherImage: mainWeatherImage,
+                  // weatherType: typeOfWeather,
+                  // weatherDescription: weatherDescription,
+                  // feels: feelsLike,
+                  // pressure: pressure,
+                  // wind: windSpeed,
+                  // humidity: humidity,
                 ),
               ),
               (Route<dynamic> route) => false,
@@ -428,10 +428,20 @@ class MainProvider extends ChangeNotifier {
     cityAlreadyExist = false;
   }
 
+  // making the helper for the changing of location and its data
+  Future<void> changingLocation(int ind) async {
+    if (ind == indexHelper) {
+      if (kDebugMode) print('The Index is same, no changes');
+      return;
+    }
+    await changingIndex(ind);
+    await reChangingMainData(ind);
+    notifyListeners();
+  }
+
   // // making the function for  changing the index of data in the WeatherPage
   Future<void> changingIndex(int ind) async {
     indexHelper = ind;
-    notifyListeners();
   }
 
   // making the Function for changing the main elements of the page based on index
@@ -446,7 +456,6 @@ class MainProvider extends ChangeNotifier {
     windSpeed = (dataList[ind]['apiData']['current']['wind_speed'] * 3.6);
     humidity = dataList[ind]['apiData']['current']['humidity'];
     await mainWeatherIconChanging();
-    notifyListeners();
   }
 
   Future<void> refreshAllFunction(BuildContext context) async {
@@ -488,19 +497,19 @@ class MainProvider extends ChangeNotifier {
           }
         }
         isRefreshingAll = false;
-        if(context.mounted) {
-        b.showSnackBar(globalBar('All Cities Refreshed', context));
-        Navigator.of(context).pop();
+        if (context.mounted) {
+          b.showSnackBar(globalBar('All Cities Refreshed', context));
+          Navigator.of(context).pop();
         }
         await savingDataToMobile();
       } else {
         if (kDebugMode) print('Cannot refresh');
       }
     } catch (e) {
-       if(context.mounted) {
+      if (context.mounted) {
         b.showSnackBar(globalBar('Un-able to refresh', context));
         Navigator.of(context).pop();
-        }
+      }
       if (kDebugMode) print(e);
       isRefreshingAll = false;
     }

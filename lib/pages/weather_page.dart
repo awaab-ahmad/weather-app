@@ -2,38 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/pages/search_location.dart';
-import 'package:weather/services/globals.dart';
 import 'package:weather/services/cards.dart';
+import 'package:weather/services/globals.dart';
 import 'package:weather/services/provider.dart';
+import 'package:weather/services/styles.dart';
 
 // Making the Model Class and then shifting the data on basis
 
 // ignore: must_be_immutable
 class ModelClass extends StatefulWidget {
-  int index;
-  String city;
-  double? temperature;
-  String? weatherImage;
-  String? weatherType;
-  String? weatherDescription;
-  double? feels;
-
-  int? pressure;
-  double? wind;
-  int? humidity;
-  ModelClass({
-    super.key,
-    required this.index,
-    required this.city,
-    required this.temperature,
-    required this.weatherImage,
-    required this.weatherType,
-    required this.weatherDescription,
-    required this.feels,
-    required this.pressure,
-    required this.wind,
-    required this.humidity,
-  });
+  final int index;
+  const ModelClass({super.key, required this.index});
 
   @override
   State<ModelClass> createState() => _ModelClassState();
@@ -58,28 +37,13 @@ class _ModelClassState extends State<ModelClass> {
 
   @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
-    final w = MediaQuery.of(context).size.width;
-    return Scaffold(       
-      extendBody: true,   
+    return Scaffold(
       body: Stack(
         children: [
-          //        Image.asset(
-          //           fit: BoxFit.fill,
-          //           'images/night_time.jpg',
-          //           height: h * 1.0,
-          //           width: w * 1.0,
-          //         )
-          Container(
-            width: w * 1.0,
-            height: h * 1.0,
-            decoration: BoxDecoration(
-              gradient: context.read<MainProvider>().gradientBack,
-            ),
-          ),
+          const GradientContainer(),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: RefreshIndicator(
                 backgroundColor: const Color(0xFFFFFFFF),
                 color: const Color(0xFF0088FF),
@@ -89,271 +53,286 @@ class _ModelClassState extends State<ModelClass> {
                     widget.index,
                   );
                 },
-                child: SingleChildScrollView(                  
+                child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  child: AnimatedSwitcher(
-                    duration: Duration(milliseconds: 500),
-                    child: Column(
-                      key: ValueKey(widget.index),
-                      crossAxisAlignment: .center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: .spaceBetween,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                showModalBottomSheet(
-                                  barrierColor: const Color(0x66000000),
-                                  context: context,
-                                  useSafeArea: true,
-                                  backgroundColor: const Color(0x00000000),
-                                  isScrollControlled: true,
-                                  builder: (context) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: h * 0.08,
-                                      ),
-                                      child: BackdropFilter(
-                                        filter: .blur(
-                                          sigmaX: 02, sigmaY: 02
-                                        ),
-                                        child: allLocationsBottomSheet(
-                                          h,
-                                          w,
-                                          context,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              padding: EdgeInsets.zero,
-                              icon: Image.asset(
-                                'images/navigation.png',
-                                color: const Color(0xFFffffff),
-                                height: 30,
-                              ),
-                            ),
-                            const SizedBox(width: 05),
-                            context.read<MainProvider>().isLoading == true
-                                ? SizedBox(
-                                    height: 30,
-                                    width: 30,
-                                    child: Card(
-                                      color: const Color(0x00000000),
-                                      shadowColor: const Color(0x00000000),
-                                      child: CircularProgressIndicator(
-                                        color: const Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                            const Expanded(child: SizedBox()),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => SearchPage(),
-                                  ),
-                                );
-                              },
-                              padding: EdgeInsets.all(0),
-                              icon: Image.asset(
-                                'images/location.png',
-                                height: 30,
-                                color: const Color(0xFFFFFFFF),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Card(
-                          margin: const EdgeInsets.all(0),
-                          color: const Color(0x00000000),
-                          shadowColor: const Color(0x00000000),
-                          child: Column(
-                            children: [
-                              text(widget.city, 20, FontWeight.w600),
-                              const SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: .center,
-                                children: [
-                                  text(
-                                    widget.temperature!.toStringAsFixed(0),
-                                    40,
-                                    FontWeight.w600,
-                                  ),
-                                  Transform.translate(
-                                    offset: Offset(0, -21),
-                                    child: text('°', 15, FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: .center,
-                                children: [
-                                  text(
-                                    widget.weatherDescription!,
-                                    16,
-                                    FontWeight.w600,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Image.asset(
-                                    widget.weatherImage!,
-                                    width: w * 0.09,
-                                  ),
-                                ],
-                              ),
-                              context.read<MainProvider>().dataList.isEmpty
-                                  ? const SizedBox.shrink()
-                                  : Row(
-                                      mainAxisAlignment: .spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Image.asset(
-                                              'images/sunrise.png',
-                                              height: 20,
-                                            ),
-                                            const SizedBox(width: 05),
-                                            text(
-                                              '${context.read<MainProvider>().dataList[widget.index]['sunriseHour']}',
-                                              12,
-                                              FontWeight.w500,
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 30),
-                                        Row(
-                                          children: [
-                                            Image.asset(
-                                              'images/sunset.png',
-                                              height: 20,
-                                            ),
-                                            const SizedBox(width: 05),
-                                            text(
-                                              '${context.read<MainProvider>().dataList[widget.index]['sunsetHour']}',
-                                              12,
-                                              FontWeight.w500,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                              const SizedBox(height: 05),
-                              Row(
-                                mainAxisAlignment: .spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    height: 28,
-                                    width: w * 0.3,
-                                    child: Card(
-                                      margin: const EdgeInsets.all(0),
-                                      color: const Color(0x33727272),
-                                      shadowColor: const Color(0x33727272),
-                                      elevation: 0,
-                                      child: Row(
-                                        mainAxisAlignment: .center,
-                                        children: [
-                                          const SizedBox(width: 05),
-                                          Image.asset(
-                                            'images/hot.png',
-                                            height: 15,
-                                          ),
-                                          const SizedBox(width: 05),
-                                          Expanded(
-                                            child: FittedBox(
-                                              child: text(
-                                                'Feels Like: ${widget.feels!.toStringAsFixed(0)}',
-                                                08,
-                                                FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          Transform.translate(
-                                            offset: Offset(0, -06),
-                                            child: text(
-                                              '°',
-                                              10,
-                                              FontWeight.w600,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 05),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 28,
-                                    width: w * 0.3,
-                                    child: Card(
-                                      margin: const EdgeInsets.all(0),
-                                      color: const Color(0x33727272),
-                                      shadowColor: const Color(0x33727272),
-                                      elevation: 0,
-                                      child: Row(
-                                        mainAxisAlignment: .center,
-                                        children: [
-                                          const SizedBox(width: 05),
-                                          Image.asset(
-                                            'images/wind.png',
-                                            color: const Color(0xFfffffff),
-                                            height: 15,
-                                          ),
-                                          const SizedBox(width: 05),
-                                          text(
-                                            '${widget.wind!.toStringAsFixed(2)} km/h',
-                                            08,
-                                            FontWeight.w500,
-                                          ),
-                                          const SizedBox(width: 05),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 28,
-                                    width: w * 0.3,
-                                    child: Card(
-                                      margin: const EdgeInsets.all(0),
-                                      color: const Color(0x33727272),
-                                      shadowColor: const Color(0x33727272),
-                                      elevation: 0,
-                                      child: Row(
-                                        mainAxisAlignment: .center,
-                                        children: [
-                                          const SizedBox(width: 05),
-                                          Image.asset(
-                                            'images/humidity.png',
-                                            height: 15,
-                                          ),
-                                          const SizedBox(width: 05),
-                                          text(
-                                            '${widget.humidity} %',
-                                            08,
-                                            FontWeight.w500,
-                                          ),
-                                          const SizedBox(width: 05),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 05),
-                        hourlyForecastCard(h, w, context),
-                        const SizedBox(height: 05),
-                        dailyForecastCard(h, w, context),
-                      ],
-                    ),
+                  child: Column(
+                    crossAxisAlignment: .center,
+                    children: [
+                      const TopRow(),
+                      CityDetailsCard(index: widget.index),
+                      const SizedBox(height: 05),
+                      const HourlyForecastCard(),
+                      const SizedBox(height: 05),
+                      const DailyForecastCard(),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TopRow extends StatelessWidget {
+  const TopRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (kDebugMode) print('The Top row rebuild');
+    final sz = MediaQuery.sizeOf(context);
+    return Row(
+      mainAxisAlignment: .spaceBetween,
+      children: [
+        IconButton(
+          onPressed: () {
+            bottomSheet(
+              context,
+              Padding(
+                padding: EdgeInsets.only(bottom: sz.height * 0.02),
+                child: BackdropFilter(
+                  filter: .blur(sigmaX: 02, sigmaY: 02),
+                  child: const AllLocationsSheet(),
+                ),
+              ),
+            );
+          },
+          padding: EdgeInsets.zero,
+          icon: Image.asset(
+            'images/navigation.png',
+            color: const Color(0xFFffffff),
+            height: 30,
+          ),
+        ),
+        const SizedBox(width: 05),
+        const LoadingIndicator(),
+        const Expanded(child: SizedBox()),
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).push(navigator(SearchPage()));
+          },
+          padding: EdgeInsets.all(0),
+          icon: Image.asset(
+            'images/location.png',
+            height: 30,
+            color: const Color(0xFFFFFFFF),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class GradientContainer extends StatelessWidget {
+  const GradientContainer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final sz = MediaQuery.sizeOf(context);
+    return Selector<MainProvider, LinearGradient>(
+      selector: (_, pro) => pro.gradientBack,
+      builder: (context, gradientColor, child) => Container(
+        width: sz.width * 1.0,
+        height: sz.height * 1.0,
+        decoration: BoxDecoration(gradient: gradientColor),
+      ),
+    );
+  }
+}
+
+class LoadingIndicator extends StatelessWidget {
+  const LoadingIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.watch<MainProvider>().isLoading == true) {
+      return SizedBox(
+        height: 30,
+        width: 30,
+        child: Card(
+          color: const Color(0x00000000),
+          shadowColor: const Color(0x00000000),
+          child: CircularProgressIndicator(color: const Color(0xFFFFFFFF)),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+class CityDetailsCard extends StatelessWidget {
+  final int index;
+  const CityDetailsCard({super.key, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    if (kDebugMode) print('The Whole City card build');
+    final sz = MediaQuery.sizeOf(context);
+    return Card(
+      margin: const EdgeInsets.all(0),
+      color: const Color(0x00000000),
+      shadowColor: const Color(0x00000000),
+      child: Column(
+        children: [
+          Selector<MainProvider, String>(
+            selector: (_, pro) => pro.cityName,
+            builder: (_, city, _) {
+              // if (kDebugMode) print('City Name rebuilt');
+              return Text(city, style: Style.medWhite);
+            },
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: .center,
+            children: [
+              Selector<MainProvider, double>(
+                selector: (_, pro) => pro.temp,
+                builder: (_, temp, _) =>
+                    Text(temp.toStringAsFixed(0), style: Style.largeWhite),
+              ),
+              Transform.translate(
+                offset: Offset(0, -21),
+                child: const Text('°', style: Style.simpleWhite),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: .center,
+            children: [
+              Selector<MainProvider, String>(
+                selector: (_, pro) => pro.weatherDescription,
+                builder: (_, desc, _) => Text(desc, style: Style.simpleWhite),
+              ),
+              const SizedBox(width: 10),
+              Selector<MainProvider, String>(
+                selector: (_, pro) => pro.mainWeatherImage,
+                builder: (_, image, _) {
+                  return Image.asset(image, width: sz.width * 0.09);
+                },
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Image.asset('images/sunrise.png', height: 20),
+                  const SizedBox(width: 05),
+                  Selector<MainProvider, String>(
+                    selector: (_, pro) => pro.dataList[index]['sunriseHour'],
+                    builder: (_, sunrise, _) {
+                      return Text(sunrise, style: Style.standardWhite);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(width: 30),
+              Row(
+                children: [
+                  Image.asset('images/sunset.png', height: 20),
+                  const SizedBox(width: 05),
+                  Selector<MainProvider, String>(
+                    selector: (_, pro) => pro.dataList[index]['sunsetHour'],
+                    builder: (_, sunset, _) {
+                      return Text(sunset, style: Style.standardWhite);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 05),
+          Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              _SmallCard(
+                imagePath: 'images/hot.png',
+                child: Row(
+                  children: [
+                    Selector<MainProvider, double>(
+                      selector: (_, pro) => pro.feelsLike,
+                      builder: (_, feels, _) => FittedBox(
+                        child: Text(
+                          'Feels Like: ${feels.toStringAsFixed(0)}',
+                          style: Style.smallWhite,
+                        ),
+                      ),
+                    ),
+                    FittedBox(
+                      child: Transform.translate(
+                        offset: const Offset(0, -6),
+                        child: const Text('°', style: Style.smlStandardWhite),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _SmallCard(
+                imagePath: 'images/wind.png',
+                child: Selector<MainProvider, double>(
+                  selector: (_, pro) => pro.windSpeed,
+                  builder: (_, wind, _) {
+                    // if (kDebugMode) print('Wind small box rebuilt');
+                    return Text(
+                      '${wind.toStringAsFixed(2)} km/h',
+                      style: Style.smallWhite,
+                    );
+                  },
+                ),
+              ),
+              _SmallCard(
+                imagePath: 'images/humidity.png',
+                child: Selector<MainProvider, int>(
+                  selector: (_, pro) => pro.humidity,
+                  builder: (_, humidity, _) {
+                    // if (kDebugMode) print('Humidity small rebuilt');
+                    return Text('$humidity %', style: Style.smallWhite);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmallCard extends StatelessWidget {
+  final String imagePath;
+  final Widget child;
+  const _SmallCard({required this.imagePath, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final sz = MediaQuery.sizeOf(context);
+    return SizedBox(
+      height: 28,
+      width: sz.width * 0.28,
+      child: Card(
+        margin: const EdgeInsets.all(0),
+        color: const Color(0x33727272),
+        shadowColor: const Color(0x33727272),
+        elevation: 0,
+        child: Row(
+          mainAxisAlignment: .center,
+          children: [
+            const Expanded(child: SizedBox()),
+            Image.asset(
+              imagePath,
+              height: 15,
+              color: imagePath.contains('wind')
+                  ? const Color(0xffffffff)
+                  : null,
+            ),
+            const SizedBox(width: 05),
+            child,
+            const Expanded(child: SizedBox()),
+          ],
+        ),
       ),
     );
   }

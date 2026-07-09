@@ -7,16 +7,19 @@ import 'package:weather/services/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
-      statusBarColor: const Color(0x00FFFFFF),
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: const Color(0x00000000),
-      systemNavigationBarIconBrightness: .light,
-      systemNavigationBarContrastEnforced: false
-    ),    
-  );
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: const Color(0x00FFFFFF),
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: const Color(0x00000000),
+        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
+  });
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => MainProvider()
@@ -48,15 +51,15 @@ class _MainClassState extends State<MainClass> {
             ? CoverPage()
             : ModelClass(
                 index: p.indexHelper,
-                city: p.cityName,
-                temperature: p.temp,
-                weatherImage: p.mainWeatherImage,
-                weatherType: p.typeOfWeather,
-                weatherDescription: p.weatherDescription,
-                feels: p.feelsLike,
-                pressure: p.pressure,
-                wind: p.windSpeed,
-                humidity: p.humidity,
+                // city: p.cityName,
+                // temperature: p.temp,
+                // weatherImage: p.mainWeatherImage,
+                // weatherType: p.typeOfWeather,
+                // weatherDescription: p.weatherDescription,
+                // feels: p.feelsLike,
+                // pressure: p.pressure,
+                // wind: p.windSpeed,
+                // humidity: p.humidity,
               ),
       ),
     );
