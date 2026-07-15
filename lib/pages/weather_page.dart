@@ -11,8 +11,7 @@ import 'package:weather/services/styles.dart';
 
 // ignore: must_be_immutable
 class ModelClass extends StatefulWidget {
-  final int index;
-  const ModelClass({super.key, required this.index});
+  const ModelClass({super.key});
 
   @override
   State<ModelClass> createState() => _ModelClassState();
@@ -49,9 +48,8 @@ class _ModelClassState extends State<ModelClass> {
                 color: const Color(0xFF0088FF),
                 key: refreshState,
                 onRefresh: () async {
-                  return context.read<MainProvider>().refreshIndicatorFunction(
-                    widget.index,
-                  );
+                  final p = context.read<MainProvider>();
+                  return p.refreshIndicatorFunction(p.indexHelper);
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -59,7 +57,7 @@ class _ModelClassState extends State<ModelClass> {
                     crossAxisAlignment: .center,
                     children: [
                       const TopRow(),
-                      CityDetailsCard(index: widget.index),
+                      const CityDetailsCard(),
                       const SizedBox(height: 05),
                       const HourlyForecastCard(),
                       const SizedBox(height: 05),
@@ -163,8 +161,7 @@ class LoadingIndicator extends StatelessWidget {
 }
 
 class CityDetailsCard extends StatelessWidget {
-  final int index;
-  const CityDetailsCard({super.key, required this.index});
+  const CityDetailsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -222,9 +219,13 @@ class CityDetailsCard extends StatelessWidget {
                   Image.asset('images/sunrise.png', height: 20),
                   const SizedBox(width: 05),
                   Selector<MainProvider, String>(
-                    selector: (_, pro) => pro.dataList[index]['sunriseHour'],
+                    selector: (p, pro) =>
+                        pro.dataList[pro.indexHelper]['sunriseHour'],
                     builder: (_, sunrise, _) {
-                      return Text(sunrise, style: Style.standardWhite);
+                      if (sunrise.isNotEmpty) {
+                        return Text(sunrise, style: Style.standardWhite);
+                      }
+                      return const Text('Not set', style: Style.standardWhite);
                     },
                   ),
                 ],
@@ -235,9 +236,13 @@ class CityDetailsCard extends StatelessWidget {
                   Image.asset('images/sunset.png', height: 20),
                   const SizedBox(width: 05),
                   Selector<MainProvider, String>(
-                    selector: (_, pro) => pro.dataList[index]['sunsetHour'],
+                    selector: (_, pro) =>
+                        pro.dataList[pro.indexHelper]['sunsetHour'],
                     builder: (_, sunset, _) {
-                      return Text(sunset, style: Style.standardWhite);
+                      if (sunset.isNotEmpty) {
+                        return Text(sunset, style: Style.standardWhite);
+                      }
+                      return const Text('Not Set', style: Style.standardWhite);
                     },
                   ),
                 ],

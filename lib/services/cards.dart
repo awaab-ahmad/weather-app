@@ -39,7 +39,7 @@ class HourlyForecastCard extends StatelessWidget {
                   radius: Radius.circular(20),
                   child: p.dataList.isEmpty
                       ? Center(
-                          child: const Text(
+                            child: const Text(
                             'Loading First time setup',
                             style: Style.smlStandardWhite,
                           ),

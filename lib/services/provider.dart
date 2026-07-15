@@ -13,7 +13,7 @@ import 'package:weather/services/snackbar.dart';
 // The Provider file with all the required Business Logic
 class MainProvider extends ChangeNotifier {
   final client = http.Client();
-  bool firstTimeSetupDone = false;
+  bool ?firstTimeSetupDone;
   bool isLoading = false;
   bool isDoneOnce = false;
   bool isRefreshingAll = false;
@@ -386,20 +386,7 @@ class MainProvider extends ChangeNotifier {
             await reChangingMainData(indexHelper);
             if (!context.mounted) return;
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => ModelClass(
-                  index: indexHelper,
-                  // city: cityName,
-                  // temperature: temp,
-                  // weatherImage: mainWeatherImage,
-                  // weatherType: typeOfWeather,
-                  // weatherDescription: weatherDescription,
-                  // feels: feelsLike,
-                  // pressure: pressure,
-                  // wind: windSpeed,
-                  // humidity: humidity,
-                ),
-              ),
+              MaterialPageRoute(builder: (context) => const ModelClass()),
               (Route<dynamic> route) => false,
             );
             ScaffoldMessenger.of(context).showSnackBar(

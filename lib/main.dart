@@ -8,18 +8,6 @@ import 'package:weather/services/provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: const Color(0x00FFFFFF),
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: const Color(0x00000000),
-        systemNavigationBarIconBrightness: Brightness.light,
-        systemNavigationBarContrastEnforced: false,
-      ),
-    );
-  });
-
   runApp(
     ChangeNotifierProvider(
       create: (_) => MainProvider()
@@ -28,6 +16,17 @@ void main() {
       child: const MainClass(),
     ),
   );
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: const Color(0x00000000),
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
+  });
 }
 
 class MainClass extends StatefulWidget {
@@ -40,27 +39,19 @@ class MainClass extends StatefulWidget {
 class _MainClassState extends State<MainClass> {
   @override
   Widget build(BuildContext context) {
-    final p = context.watch<MainProvider>();
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 600),
-      child: MaterialApp(
-        key: ValueKey(p.firstTimeSetupDone),
-        theme: ThemeData.dark(),
-        debugShowCheckedModeBanner: false,
-        home: context.read<MainProvider>().firstTimeSetupDone == false
-            ? CoverPage()
-            : ModelClass(
-                index: p.indexHelper,
-                // city: p.cityName,
-                // temperature: p.temp,
-                // weatherImage: p.mainWeatherImage,
-                // weatherType: p.typeOfWeather,
-                // weatherDescription: p.weatherDescription,
-                // feels: p.feelsLike,
-                // pressure: p.pressure,
-                // wind: p.windSpeed,
-                // humidity: p.humidity,
-              ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Selector<MainProvider, bool?>(
+        selector: (_, pro) => pro.firstTimeSetupDone,
+        builder: (_, setup, _) {
+          if (setup == null) {
+            return Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+          if (setup == false) {
+            return CoverPage();
+          }
+          return const ModelClass();
+        },
       ),
     );
   }
