@@ -1,10 +1,5 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
-import 'package:http/http.dart' as http;
 import 'package:weather/services/provider.dart';
 import 'package:weather/services/styles.dart';
 
@@ -16,24 +11,25 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  String googlePlacesApi = "// not visible";
-  TextEditingController controller = TextEditingController();
-  var uuid = const Uuid().v4();
-  List data = [];
-  double lati = 0.0;
-  double longi = 0.0;
   @override
   void initState() {
     super.initState();
-    controller.addListener(() {
-      _onChange();
+    final p = context.read<MainProvider>();
+    p.controllerAssign();
+    p.searchCont!.addListener(() {
+      p.onChange();
     });
   }
 
   @override
+  void didChangeDependencies() {
+    context.read<MainProvider>().disposing();
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
-    final w = MediaQuery.of(context).size.width;
+    final sz = MediaQuery.sizeOf(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -45,8 +41,8 @@ class _SearchPageState extends State<SearchPage> {
               opacity: 0.7,
               child: Image.asset(
                 'images/search_page.jpg',
-                height: h * 1.0,
-                width: w * 1.0,
+                height: sz.height * 1.0,
+                width: sz.width * 1.0,
                 fit: BoxFit.cover,
               ),
             ),
@@ -80,13 +76,9 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: controller,
+                      controller: context.read<MainProvider>().searchCont,
                       onChanged: (value) {
-                        setState(() {
-                          if (controller.text.trim().isEmpty) {
-                            data = [];
-                          }
-                        });
+                        context.read<MainProvider>().onChangingSearch();
                       },
                       cursorColor: const Color(0xFFFFFFFF),
                       style: Style.standardWhite,
@@ -114,56 +106,77 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
-                      height: h * 0.4,
-                      width: w * 1.0,
+                      height: sz.height * 0.5,
                       child: Card(
-                        color: const Color(0x33FFFFFF),
-                        child: data.isEmpty
-                            ? Center(
-                                child: const Text(
-                                  'Search something ',
-                                  style: Style.smlStandardWhite,
+                        shadowColor: const Color(0x00000000),
+                        clipBehavior: .antiAlias,
+                        color: const Color(0x00FFFFFF),
+                        child: Selector<MainProvider, bool>(
+                          selector: (_, pro) => pro.isSearching,
+                          builder: (_, searching, _) {
+                            if (searching) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: const Color(0xFFFFFFFF),
                                 ),
-                              )
-                            : ListView.builder(
+                              );
+                            }
+                            return Selector<MainProvider, dynamic>(
+                              selector: (_, pro) => pro.data,
+                              builder: (_, data, _) => ListView.builder(
                                 itemCount: data.length,
                                 itemBuilder: (context, index) {
                                   // now making the things to go working perfectly
                                   final ind = data[index]['placePrediction'];
                                   final placeName = ind['text']['text'];
                                   final placeId = ind['placeId'];
-                                  return ListTile(
-                                    onTap: () async {
-                                      final p = context.read<MainProvider>();
-                                      showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (context) => Center(
-                                          child: CircularProgressIndicator(
-                                            color: const Color(0xFFFFFFFF),
+                                  return Padding(
+                                    padding: const .symmetric(vertical: 2),
+                                    child: ListTile(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: .circular(20),
+                                      ),
+                                      contentPadding: const .symmetric(
+                                        vertical: 1,
+                                        horizontal: 5,
+                                      ),
+                                      tileColor: const Color(0x33FFFFFF),
+                                      onTap: () async {
+                                        final p = context.read<MainProvider>();
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) => Center(
+                                            child: CircularProgressIndicator(
+                                              color: const Color(0xFFFFFFFF),
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                      await gettingLocationData(placeId);
-                                      await p.gettingDataOfSerachedPlace(
-                                        lati,
-                                        longi,
-                                        // ignore: use_build_context_synchronously
-                                        context,
-                                      );
-                                    },
-                                    leading: Icon(
-                                      Icons.location_on,
-                                      color: const Color(0xFFFFFFFF),
-                                      size: 30,
-                                    ),
-                                    title: Text(
-                                      placeName,
-                                      style: Style.standardWhite,
+                                        );
+                                        await p.gettingLocationData(placeId);
+                                        await p.gettingLocationData(placeId);
+                                        await p.gettingDataOfSerachedPlace(
+                                          p.lati,
+                                          p.longi,
+                                          // ignore: use_build_context_synchronously
+                                          context,
+                                        );
+                                      },
+                                      leading: Icon(
+                                        Icons.location_on,
+                                        color: const Color(0xFFFFFFFF),
+                                        size: 30,
+                                      ),
+                                      title: Text(
+                                        placeName,
+                                        style: Style.standardWhite,
+                                      ),
                                     ),
                                   );
                                 },
                               ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -185,68 +198,4 @@ class _SearchPageState extends State<SearchPage> {
     borderSide: BorderSide(width: 1.5, color: const Color(0xFFFFFFFF)),
     borderRadius: BorderRadius.circular(20),
   );
-
-  void _onChange() {
-    if (controller.text.trim().isNotEmpty) {
-      predictionFunction(controller.text.trim());
-    }
-  }
-
-  // making the function here for the working
-  void predictionFunction(String input) async {
-    String baseUrl = 'https://places.googleapis.com/v1/places:autocomplete';
-    // now making the working of implementation
-    try {
-      final structure = await http.post(
-        Uri.parse(baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': googlePlacesApi,
-        },
-        body: jsonEncode({'input': input, 'sessionToken': uuid}),
-      );
-      if (structure.statusCode == 200) {
-        final response = json.decode(structure.body);
-        setState(() {
-          data = response['suggestions'];
-        });
-      } else {
-        if (kDebugMode) {
-          print('Unable to implement');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) print(e);
-    }
-  }
-
-  // making the function for the displaying of the data
-  Future gettingLocationData(String placeId) async {
-    try {
-      lati = 0.0;
-      longi = 0.0;
-      String url = 'https://places.googleapis.com/v1/places/$placeId';
-      final format = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': googlePlacesApi,
-          'X-Goog-FieldMask': 'name,displayName,location',
-        },
-      );
-      if (kDebugMode) print(format.statusCode);
-      if (format.statusCode == 200) {
-        final response = json.decode(format.body);
-        if (kDebugMode) print(response);
-        setState(() {
-          lati = response['location']['latitude'];
-          longi = response['location']['longitude'];
-        });
-      } else {
-        if (kDebugMode) print('Unable to get it done');
-      }
-    } catch (e) {
-      if (kDebugMode) print(e);
-    }
-  }
 }

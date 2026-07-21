@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import 'package:weather/pages/weather_page.dart';
 import 'package:weather/services/colors.dart';
 import 'package:weather/services/geolocator_location.dart';
@@ -13,7 +14,7 @@ import 'package:weather/services/snackbar.dart';
 // The Provider file with all the required Business Logic
 class MainProvider extends ChangeNotifier {
   final client = http.Client();
-  bool ?firstTimeSetupDone;
+  bool? firstTimeSetupDone;
   bool isLoading = false;
   bool isDoneOnce = false;
   bool isRefreshingAll = false;
@@ -517,5 +518,94 @@ class MainProvider extends ChangeNotifier {
     dataList.removeAt(index);
     await savingDataToMobile();
     notifyListeners();
+  }
+
+  String googlePlacesApi = "AIzaSyDQ2YO5rv0oYKkO9n-Xidu9PZroRB1-tuc";
+  double lati = 0.0;
+  double longi = 0.0;
+  var uuid = const Uuid().v4();
+  List data = [];
+  TextEditingController? searchCont;
+  bool isSearching = false;
+
+  void controllerAssign() {
+    if (kDebugMode) print(searchCont);
+    searchCont = TextEditingController();
+  }
+
+  void disposing() {
+    searchCont!.clear();
+  }
+
+  void onChangingSearch() {
+    if (searchCont!.text.trim().isEmpty) {
+      data = [];
+    }
+    notifyListeners();
+  }
+
+  void onChange() {
+    if (kDebugMode) print('The Function is being called');
+    if (searchCont!.text.trim().isNotEmpty) {
+      predictionFunction(searchCont!.text.trim());
+    }
+  }
+
+  // making the function here for the working
+  void predictionFunction(String input) async {
+    String baseUrl = 'https://places.googleapis.com/v1/places:autocomplete';
+    // now making the working of implementation
+    try {
+      isSearching = true;
+      notifyListeners();
+      final structure = await http.post(
+        Uri.parse(baseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': googlePlacesApi,
+        },
+        body: jsonEncode({'input': input, 'sessionToken': uuid}),
+      );
+      if (structure.statusCode == 200) {
+        final response = json.decode(structure.body);
+        data = response['suggestions'];
+      } else {
+        if (kDebugMode) {
+          print('Unable to implement');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
+    isSearching = false;
+    notifyListeners();
+  }
+
+  // making the function for the displaying of the data
+  Future gettingLocationData(String placeId) async {
+    try {
+      lati = 0.0;
+      longi = 0.0;
+      String url = 'https://places.googleapis.com/v1/places/$placeId';
+      final format = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': googlePlacesApi,
+          'X-Goog-FieldMask': 'name,displayName,location',
+        },
+      );
+      if (kDebugMode) print(format.statusCode);
+      if (format.statusCode == 200) {
+        final response = json.decode(format.body);
+        if (kDebugMode) print(response);
+        lati = response['location']['latitude'];
+        longi = response['location']['longitude'];
+      } else {
+        if (kDebugMode) print('Unable to get it done');
+      }
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
   }
 }

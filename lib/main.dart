@@ -40,6 +40,7 @@ class _MainClassState extends State<MainClass> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
       home: Selector<MainProvider, bool?>(
         selector: (_, pro) => pro.firstTimeSetupDone,
